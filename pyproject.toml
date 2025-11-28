@@ -1,0 +1,60 @@
+[tool.poetry]
+name = "batch-infer"
+version = "0.1.0"
+description = "A small research-engineering-style batch inference engine for transformer models, including synthetic data generation and retry/backoff support."
+authors = ["Kay Wilkinson <me@k-wilkinson.com>"]
+license = "MIT"
+
+
+[tool.poetry.dependencies]
+python = ">=3.10,<3.13"
+torch = ">=2.1"
+transformers = ">=4.40"
+tqdm = ">=4.66"
+pydantic = ">=2.6"
+pandas = ">=2.2"
+
+[tool.poetry.group.dev.dependencies]
+pytest = ">=7.4"
+pytest-cov = ">=4.1"
+black = ">=24.4"
+ruff = ">=0.5.0"
+isort = ">=5.13"
+mypy = ">=1.9"
+pre-commit = ">=3.7"
+types-requests = "*"
+types-PyYAML = "*"
+
+[tool.black]
+line-length = 100
+target-version = ["py311"]
+
+[tool.isort]
+profile = "black"
+line_length = 100
+
+[tool.ruff]
+line-length = 100
+select = ["E", "F", "I", "B"]
+ignore = ["E501"]
+
+[tool.mypy]
+python_version = "3.11"
+ignore_missing_imports = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+warn_unused_ignores = true
+warn_return_any = true
+strict_optional = true
+check_untyped_defs = true
+show_error_codes = true
+pretty = true
+
+[tool.pytest.ini_options]
+minversion = "7.0"
+addopts = "-ra --cov=batch_infer --cov-report=term-missing --cov-fail-under=90"
+testpaths = ["batch_infer/tests"]
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
