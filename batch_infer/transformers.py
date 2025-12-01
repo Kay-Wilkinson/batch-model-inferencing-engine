@@ -56,10 +56,7 @@ class AutoTokenizer:
 
         # Pad
         max_len = max(len(x) for x in input_ids)
-        padded = [
-            ids + [self.pad_token_id] * (max_len - len(ids))
-            for ids in input_ids
-        ]
+        padded = [ids + [self.pad_token_id] * (max_len - len(ids)) for ids in input_ids]
 
         tensor = torch.tensor(padded, dtype=torch.long)
 
@@ -134,4 +131,3 @@ class AutoModelForSequenceClassification(nn.Module):
         emb = self.embed(input_ids).mean(dim=1)
         logits = self.classifier(emb)
         return SequenceClassifierOutput(logits=logits)
-

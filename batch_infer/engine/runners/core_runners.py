@@ -68,9 +68,15 @@ class BatchInferenceRunner:
 
                 # exponential increase, capped TODO: Make the cap configurable
                 backoff = min(
-                    backoff * retry_cfg.backoff_multiplier
-                    if backoff > 0.0
-                    else retry_cfg.initial_backoff,
-                    retry_cfg.max_backoff if retry_cfg.max_backoff > 0.0 else retry_cfg.initial_backoff,
+                    (
+                        backoff * retry_cfg.backoff_multiplier
+                        if backoff > 0.0
+                        else retry_cfg.initial_backoff
+                    ),
+                    (
+                        retry_cfg.max_backoff
+                        if retry_cfg.max_backoff > 0.0
+                        else retry_cfg.initial_backoff
+                    ),
                 )
                 attempt += 1

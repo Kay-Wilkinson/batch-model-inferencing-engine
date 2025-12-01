@@ -42,19 +42,16 @@ class CausalLMRunner(BaseModelRunner):
 
         decoded = self.tokenizer.batch_decode(outputs, skip_special_tokens=True)
 
-        return [
-            {"input": inp, "output": out}
-            for inp, out in zip(texts, decoded, strict=False)
-        ]
+        return [{"input": inp, "output": out} for inp, out in zip(texts, decoded, strict=False)]
 
 
 class ClassifierRunner(BaseModelRunner):
     def __init__(self, config: InferenceConfig) -> None:
         self.config = config
         self.tokenizer = AutoTokenizer.from_pretrained(config.model_name)
-        self.model = AutoModelForSequenceClassification.from_pretrained(
-            config.model_name
-        ).to(config.device)
+        self.model = AutoModelForSequenceClassification.from_pretrained(config.model_name).to(
+            config.device
+        )
         self.model.eval()
 
     def run_batch(self, texts: List[str]) -> List[Dict[str, Any]]:

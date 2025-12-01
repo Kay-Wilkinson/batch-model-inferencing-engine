@@ -16,6 +16,7 @@ class RetryConfig:
         max_backoff: Maximum amount of time to sleep between retries.
         TODO: Set config attributes to env vars so multiple engines can be spun up with differing configs
     """
+
     max_retries: int = 3
     initial_backoff: float = 1.0
     backoff_multiplier: float = 2.0

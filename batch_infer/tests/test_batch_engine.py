@@ -29,7 +29,9 @@ def test_batch_inference_batches_and_aggregates_results() -> None:
         max_new_tokens=5,
         device="cpu",
         input_column="text",
-        retry=RetryConfig(max_retries=0, initial_backoff=0.0, backoff_multiplier=1.0, max_backoff=0.0),
+        retry=RetryConfig(
+            max_retries=0, initial_backoff=0.0, backoff_multiplier=1.0, max_backoff=0.0
+        ),
     )
 
     runner = RecordingRunner()
@@ -68,7 +70,7 @@ def test_batch_inference_retries_on_failure() -> None:
         input_column="text",
         retry=RetryConfig(
             max_retries=1,
-            initial_backoff=0.0,    # no real sleeping during tests
+            initial_backoff=0.0,  # no real sleeping during tests
             backoff_multiplier=1.0,
             max_backoff=0.0,
         ),
