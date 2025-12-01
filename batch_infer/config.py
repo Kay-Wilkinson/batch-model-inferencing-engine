@@ -1,4 +1,6 @@
-from dataclasses import dataclass
+from __future__ import annotations
+
+from dataclasses import dataclass, field
 
 
 @dataclass
@@ -28,4 +30,4 @@ class InferenceConfig:
     max_new_tokens: int = 32
     device: str = "cuda"
     input_column: str = "text"
-    retry: RetryConfig = RetryConfig()
+    retry: RetryConfig = field(default_factory=RetryConfig)

@@ -1,11 +1,41 @@
+DOCKER_IMAGE ?= batch-infer
+DOCKER_TAG ?= latest
+IMAGE := $(DOCKER_IMAGE):$(DOCKER_TAG)
+
+.PHONY: build run test test-coverage test-image shell
+
 build:
-	docker build -t batch-infer:latest .
+	docker build -t $(IMAGE) .
 
-run:
-	docker run --rm -v "$PWD/batch_infer:/app/batch_infer" batch-infer:latest
+run: build
+	docker run --rm \
+		-v "$(PWD):/app" \
+		-w /app \
+		$(IMAGE) \
+		poetry run python -m examples.run_classification
 
-test:
-	docker run --rm batch-infer poetry run pytest
+test: build
+	docker run --rm \
+		-v "$(PWD):/app" \
+		-w /app \
+		$(IMAGE) \
+		poetry run pytest
 
-test-with-coverage:
-	docker run --rm batch-infer poetry run pytest --cov=batch_infer --cov-report=term-missing
+test-coverage: build
+	docker run --rm \
+		-v "$(PWD):/app" \
+		-w /app \
+		$(IMAGE) \
+		poetry run pytest --cov=batch_infer --cov-report=term-missing
+
+test-image: build
+	docker run --rm \
+		$(IMAGE) \
+		poetry run pytest
+
+shell: build
+	docker run --rm -it \
+		-v "$(PWD):/app" \
+		-w /app \
+		$(IMAGE) \
+		/bin/bash

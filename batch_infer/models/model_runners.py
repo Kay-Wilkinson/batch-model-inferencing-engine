@@ -1,6 +1,7 @@
+from __future__ import annotations
 from typing import List, Dict, Any
 import torch
-from __future__ import annotations
+
 from batch_infer.transformers import AutoModelForCausalLM, AutoTokenizer, AutoModelForSequenceClassification
 
 from batch_infer.config import InferenceConfig
@@ -8,7 +9,7 @@ from batch_infer.engine.runners.base_runners import BaseModelRunner
 
 
 class CausalLMRunner(BaseModelRunner):
-    def __init__(self, config: InferenceConfig):
+    def __init__(self, config: InferenceConfig) -> None:
         self.config = config
         self.tokenizer = AutoTokenizer.from_pretrained(config.model_name)
         self.model = AutoModelForCausalLM.from_pretrained(config.model_name).to(config.device)
@@ -16,13 +17,30 @@ class CausalLMRunner(BaseModelRunner):
 
     def run_batch(self, texts: List[str]) -> List[Dict[str, Any]]:
         encodes = self.tokenizer(
-            texts, return_tensors="pt", padding=True, truncation=True
-        ).to(self.config.device)
+            texts,
+            return_tensors="pt",
+            padding=True,
+            truncation=True,
+        )
+
+        # Support both HF BatchEncoding and stub dict
+        if hasattr(encodes, "to"):
+            encodes = encodes.to(self.config.device)
+        else:
+            encodes = {k: v.to(self.config.device) for k, v in encodes.items()}
+
         with torch.no_grad():
-            outputs = self.model.generate(**encodes, max_new_tokens=self.config.max_new_tokens)
+            outputs = self.model.generate(
+                **encodes,
+                max_new_tokens=self.config.max_new_tokens,
+            )
+
         decoded = self.tokenizer.batch_decode(outputs, skip_special_tokens=True)
 
-        return [{"input": inp, "output": out} for inp, out in zip(texts, decoded)]
+        return [
+            {"input": inp, "output": out}
+            for inp, out in zip(texts, decoded)
+        ]
 
 
 class ClassifierRunner(BaseModelRunner):
@@ -36,21 +54,25 @@ class ClassifierRunner(BaseModelRunner):
 
     def run_batch(self, texts: List[str]) -> List[Dict[str, Any]]:
         """Run sequence classification on a batch of texts.
-
         Returns a list of dicts:
-            {"input": og_text, "label": <string_label>, "score": float_prob}
+            {"input": original_text, "label": <string_label>, "score": <float_prob>}
         """
         encodes = self.tokenizer(
             texts,
             return_tensors="pt",
             padding=True,
             truncation=True,
-        ).to(self.config.device)
+        )
+
+        if hasattr(encodes, "to"):
+            encodes = encodes.to(self.config.device)
+        else:
+            encodes = {k: v.to(self.config.device) for k, v in encodes.items()}
 
         with torch.no_grad():
-            outputs = self.model(**encodes)  # forward pass, not generate()
+            outputs = self.model(**encodes)  # type: ignore[arg-type]
 
-        logits = outputs.logits  # (batch, num_labels)
+        logits = outputs.logits
         probs = torch.softmax(logits, dim=-1)
         scores, label_ids = probs.max(dim=-1)
 
