@@ -1,5 +1,5 @@
 import csv
-from typing import Generator, List, Dict, Any
+from typing import Any, Dict, Generator, List
 
 
 def read_texts_from_csv(path: str, col: str = "text") -> Generator[str, None, None]:

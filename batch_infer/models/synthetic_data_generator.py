@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from random import choice, randint
-from typing import Iterable, List, Tuple
+from typing import Iterable, List
 
 
 @dataclass

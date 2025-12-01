@@ -21,7 +21,7 @@ def test_causal_lm_runner_generates_longer_sequence(small_texts: List[str]) -> N
     results = runner.run_batch(small_texts)
 
     assert len(results) == len(small_texts)
-    for item, orig in zip(results, small_texts):
+    for item, orig in zip(results, small_texts, strict=False):
         assert item["input"] == orig
         assert "output" in item
         assert isinstance(item["output"], str)

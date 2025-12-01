@@ -1,11 +1,16 @@
 from __future__ import annotations
-from typing import List, Dict, Any
-import torch
 
-from batch_infer.transformers import AutoModelForCausalLM, AutoTokenizer, AutoModelForSequenceClassification
+from typing import Any, Dict, List
+
+import torch
 
 from batch_infer.config import InferenceConfig
 from batch_infer.engine.runners.base_runners import BaseModelRunner
+from batch_infer.transformers import (
+    AutoModelForCausalLM,
+    AutoModelForSequenceClassification,
+    AutoTokenizer,
+)
 
 
 class CausalLMRunner(BaseModelRunner):
@@ -39,7 +44,7 @@ class CausalLMRunner(BaseModelRunner):
 
         return [
             {"input": inp, "output": out}
-            for inp, out in zip(texts, decoded)
+            for inp, out in zip(texts, decoded, strict=False)
         ]
 
 
@@ -79,7 +84,7 @@ class ClassifierRunner(BaseModelRunner):
         id2label = getattr(self.model.config, "id2label", None)
 
         results: List[Dict[str, Any]] = []
-        for text, label_id, score in zip(texts, label_ids, scores):
+        for text, label_id, score in zip(texts, label_ids, scores, strict=False):
             label_idx = int(label_id.item())
             label_name = (
                 id2label[label_idx]

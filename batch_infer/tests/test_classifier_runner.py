@@ -22,7 +22,7 @@ def test_classifier_runner_basic_inference_cpu(small_texts: List[str]) -> None:
     results = runner.run_batch(small_texts)
     assert len(results) == len(small_texts)
 
-    for item, orig in zip(results, small_texts):
+    for item, orig in zip(results, small_texts, strict=False):
         assert item["input"] == orig
         assert "label" in item
         assert "score" in item
