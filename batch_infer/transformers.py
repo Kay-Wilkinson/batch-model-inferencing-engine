@@ -1,3 +1,11 @@
+from __future__ import annotations
+
+from dataclasses import dataclass
+from typing import Any, Dict, List, Optional
+
+import torch
+from torch import nn
+
 """
 Minimal mock/stub implementation of HuggingFace-like transformer classes.
 
@@ -11,14 +19,6 @@ These classes mimic the HF interface _just_ enough to support:
 - AutoModelForCausalLM
 - AutoModelForSequenceClassification
 """
-
-from __future__ import annotations
-
-from dataclasses import dataclass
-from typing import Any, Dict, List, Optional
-
-import torch
-from torch import nn
 
 
 class AutoTokenizer:
@@ -46,8 +46,8 @@ class AutoTokenizer:
         return_tensors: str = "pt",
         padding: bool = True,
         truncation: bool = True,
-        **kwargs,
-    ):
+        **kwargs: Any,
+    ) -> Dict[str, torch.Tensor]:
         input_ids = []
         for text in texts:
             toks = text.split()
@@ -62,7 +62,7 @@ class AutoTokenizer:
 
         return {"input_ids": tensor}
 
-    def batch_decode(self, sequences, skip_special_tokens=True) -> List:
+    def batch_decode(self, sequences: torch.Tensor, skip_special_tokens: bool = True) -> List:
         decoded = []
         for seq in sequences:
             toks = []
@@ -78,7 +78,7 @@ class AutoTokenizer:
 class AutoModelForCausalLM(nn.Module):
     """Stub causal LM that returns deterministic dummy 'generated' outputs."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         # Fake embedding + projection, purely for shape
         self.embed = nn.Embedding(200, 16)
@@ -88,7 +88,7 @@ class AutoModelForCausalLM(nn.Module):
     def from_pretrained(cls, model_name: str) -> "AutoModelForCausalLM":
         return cls()
 
-    def forward(self, input_ids: torch.Tensor):
+    def forward(self, input_ids: torch.Tensor) -> nn.utils.rnn.PackedSequence:
         x = self.embed(input_ids)
         logits = self.lm_head(x)
         return nn.utils.rnn.PackedSequence(logits)  # unused, but placeholder
@@ -98,7 +98,7 @@ class AutoModelForCausalLM(nn.Module):
         input_ids: torch.Tensor,
         max_new_tokens: int = 10,
         **_: Any,
-    ):
+    ) -> torch.Tensor:
         batch, seq_len = input_ids.shape
         # Create deterministic fake generation: just repeat the last token
         new_tokens = input_ids[:, -1:].repeat(1, max_new_tokens)
@@ -127,7 +127,7 @@ class AutoModelForSequenceClassification(nn.Module):
     def from_pretrained(cls, model_name: str) -> "AutoModelForSequenceClassification":
         return cls()
 
-    def forward(self, input_ids: torch.Tensor, **kwargs) -> SequenceClassifierOutput:
+    def forward(self, input_ids: torch.Tensor, **kwargs: Any) -> SequenceClassifierOutput:
         emb = self.embed(input_ids).mean(dim=1)
         logits = self.classifier(emb)
         return SequenceClassifierOutput(logits=logits)
